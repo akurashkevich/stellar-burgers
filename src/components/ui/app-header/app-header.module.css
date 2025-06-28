@@ -1,12 +1,18 @@
 .header {
   background-color: var(--background);
+  width: 100%;
 }
+
 .menu {
   display: flex;
   align-items: center;
   max-width: 1240px;
   height: 56px;
   margin: 0 auto;
+}
+
+.navlink {
+    text-decoration: none;
 }
 
 .menu_part_left {
