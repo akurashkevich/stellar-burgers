@@ -8,7 +8,7 @@ interface IIngredientsState {
   data: TIngredients;
   isLoading: boolean;
   errorMessage: string | null;
-  lastUpdated?: Date | null;
+  lastUpdated?: string | null;
 }
 
 const ingredientsInitialState: IIngredientsState = {
@@ -52,7 +52,7 @@ const burgerIngredientsSlice = createSlice({
         (state, action: PayloadAction<TIngredients>) => {
           state.isLoading = false;
           state.data = action.payload;
-          state.lastUpdated = new Date();
+          state.lastUpdated = new Date().toISOString();
         }
       );
   }
