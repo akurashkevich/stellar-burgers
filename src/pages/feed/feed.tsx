@@ -27,7 +27,10 @@ export const Feed: FC = () => {
   return (
     <>
       {feedError ? (
-        <p> Запрос заказов завершился с ошибкой: {feedError}</p>
+        <p>
+          Запрос заказов завершился с ошибкой:{' '}
+          {feedError.message || 'Неизвестная ошибка'}
+        </p>
       ) : (
         <FeedUI
           orders={orders}

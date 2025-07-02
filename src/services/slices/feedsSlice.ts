@@ -1,6 +1,10 @@
 import { getFeedsApi, getOrderByNumberApi } from '@api';
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { TOrder } from '@utils-types';
+import {
+  createAsyncThunk,
+  createSlice,
+  SerializedError
+} from '@reduxjs/toolkit';
+import { TOrder, TOrdersData } from '@utils-types';
 
 export const getFeedsThunk = createAsyncThunk('feeds/getAll', getFeedsApi);
 
@@ -10,21 +14,21 @@ export const getOrderByNumberThunk = createAsyncThunk(
 );
 
 type TFeedsState = {
-  orders: TOrder[];
+  isLoading: boolean;
   orderDetail: TOrder | null;
-  total: number;
-  totalToday: number;
-  loading: boolean;
-  error: string | null;
+  error: null | SerializedError;
+  data: TOrdersData;
 };
 
-const initialState: TFeedsState = {
-  orders: [],
+export const initialState: TFeedsState = {
+  isLoading: true,
   orderDetail: null,
-  total: 0,
-  totalToday: 0,
-  loading: false,
-  error: null
+  error: null,
+  data: {
+    orders: [],
+    total: 0,
+    totalToday: 0
+  }
 };
 
 const feedsSlice = createSlice({
@@ -32,40 +36,42 @@ const feedsSlice = createSlice({
   initialState,
   reducers: {},
   selectors: {
-    feedsSelector: (state) => state,
-    feedsOrdersSelector: (state) => state.orders,
-    feedsLoadingSelector: (state) => state.loading,
+    feedsSelector: (state) => state.data,
+    feedsOrdersSelector: (state) => state.data.orders,
+    feedsLoadingSelector: (state) => state.isLoading,
     feedsErrorSelector: (state) => state.error,
-    feedsOrderDetailSelector: (state) => state.orderDetail
+    feedsOrderDetailSelector: (state) => state.orderDetail,
+    feedsTotal: (state) => state.data.total,
+    feedsTotalToday: (state) => state.data.totalToday
   },
   extraReducers: (builder) => {
     builder
       .addCase(getFeedsThunk.pending, (state) => {
-        state.loading = true;
+        state.isLoading = true;
         state.error = null;
       })
       .addCase(getFeedsThunk.fulfilled, (state, { payload }) => {
-        state.loading = false;
-        state.orders = payload.orders;
-        state.total = payload.total;
-        state.totalToday = payload.totalToday;
+        state.isLoading = false;
+        state.data.orders = payload.orders;
+        state.data.total = payload.total;
+        state.data.totalToday = payload.totalToday;
       })
       .addCase(getFeedsThunk.rejected, (state, { error }) => {
-        state.loading = false;
-        state.error = error.message || null;
+        state.isLoading = false;
+        state.error = error || null;
       })
       .addCase(getOrderByNumberThunk.pending, (state) => {
-        state.loading = true;
+        state.isLoading = true;
         state.error = null;
         state.orderDetail = null;
       })
       .addCase(getOrderByNumberThunk.fulfilled, (state, { payload }) => {
-        state.loading = false;
+        state.isLoading = false;
         state.orderDetail = payload.orders[0];
       })
       .addCase(getOrderByNumberThunk.rejected, (state, { error }) => {
-        state.loading = false;
-        state.error = error.message || null;
+        state.isLoading = false;
+        state.error = error || null;
       });
   }
 });
@@ -78,5 +84,7 @@ export const {
   feedsOrdersSelector,
   feedsLoadingSelector,
   feedsErrorSelector,
-  feedsOrderDetailSelector
+  feedsOrderDetailSelector,
+  feedsTotal,
+  feedsTotalToday
 } = feedsSlice.selectors;
